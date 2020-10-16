@@ -1,8 +1,12 @@
+#!/usr/bin/env python3
 from library.reader import Reader
 from library.edits import delete_blanks, clean_tree
 from typing import Iterator, TextIO
+import warnings
+from tkinter import messagebox
 import sys
-import os.path
+import os
+from library.gui_utils import *
 
 
 def clean_newick(file: TextIO) -> Iterator[str]:
@@ -23,11 +27,41 @@ def clean_wrapper(filename: str) -> None:
                 print(tree, file=output)
 
 
+def launch_gui() -> None:
+    root = tk.Tk()
+    root.rowconfigure(0, weight=1)
+    root.columnconfigure(0, weight=1)
+    mainframe = ttk.Frame(root)
+    mainframe.rowconfigure(0, weight=1)
+    mainframe.columnconfigure(0, weight=1)
+
+    file_chooser = FileChooser(mainframe, label="Input file", mode="open")
+    file_chooser.grid(row=0, column=0, sticky='nsew')
+
+    def process() -> None:
+        filename = file_chooser.file_var.get()
+        try:
+            with warnings.catch_warnings(record=True) as warns:
+                clean_wrapper(filename)
+                for w in warns:
+                    tk.messagebox.showwarning(
+                        title="Warning", message=str(w.message))
+        except Exception as ex:
+            tk.messagebox.showerror(title="Error", message=str(ex))
+
+    correct_btn = ttk.Button(mainframe, text="convert", command=process)
+    correct_btn.grid(row=1, column=0)
+
+    mainframe.grid(row=0, column=0, sticky='nsew')
+
+    root.mainloop()
+
+
 def main() -> None:
     try:
         filename = sys.argv[1]
     except IndexError:
-        pass
+        launch_gui()
     else:
         clean_wrapper(filename)
 

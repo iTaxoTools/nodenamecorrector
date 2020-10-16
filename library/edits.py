@@ -1,4 +1,4 @@
-from ext_ASCII_conv_table import ext_ascii_trans
+from library.ext_ASCII_conv_table import ext_ascii_trans
 
 import re
 import unicodedata
