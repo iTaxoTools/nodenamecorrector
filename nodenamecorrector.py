@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from library.reader import Reader
-from library.edits import delete_blanks, clean_tree
+from library.edits import delete_blanks, clean_tree, clean_nexus_part
 from typing import Iterator, TextIO
 import warnings
 from tkinter import messagebox
@@ -15,12 +15,20 @@ def clean_newick(file: TextIO) -> Iterator[str]:
         yield clean_tree(delete_blanks(tree))
 
 
+def clean_nexus(file: TextIO) -> Iterator[str]:
+    file_w = Reader(file)
+    while (part := file_w.read_until(';\n').rstrip()):
+        yield clean_nexus_part(part)
+
+
 def clean_wrapper(filename: str) -> None:
     base, ext = os.path.splitext(filename)
     outfile = base + '_corr' + ext
     with open(filename) as file, open(outfile) as output:
         if file.readline().startswith('#NEXUS'):
-            raise NotImplementedError("Nexus is not supported yet")
+            print('#NEXUS', file=output)
+            for part in clean_nexus(file):
+                print(part, file=output)
         else:
             file.seek(0, 0)
             for tree in clean_newick(file):
