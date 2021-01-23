@@ -24,7 +24,7 @@ def clean_nexus(file: TextIO) -> Iterator[str]:
 def clean_wrapper(filename: str) -> None:
     base, ext = os.path.splitext(filename)
     outfile = base + '_corr' + ext
-    with open(filename) as file, open(outfile) as output:
+    with open(filename) as file, open(outfile, mode='w') as output:
         if file.readline().startswith('#NEXUS'):
             print('#NEXUS', file=output)
             for part in clean_nexus(file):
