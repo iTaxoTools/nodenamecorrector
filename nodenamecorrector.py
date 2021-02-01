@@ -15,7 +15,7 @@ def clean_newick(file: TextIO) -> Iterator[str]:
         tree = file_w.read_until(';\n')
         if not tree:
             break
-        yield clean_tree(delete_blanks(tree))
+        yield clean_tree(delete_blanks(tree)) + ';'
 
 
 def clean_nexus(file: TextIO) -> Iterator[str]:
@@ -24,7 +24,7 @@ def clean_nexus(file: TextIO) -> Iterator[str]:
         part = file_w.read_until(';\n').rstrip()
         if not part:
             break
-        yield clean_nexus_part(part)
+        yield clean_nexus_part(part) + ';'
 
 
 def clean_wrapper(filename: str) -> None:

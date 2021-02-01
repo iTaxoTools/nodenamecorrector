@@ -11,16 +11,6 @@ def delete_blanks(s: str) -> str:
     return re.sub(r'\s+', '', s)
 
 
-def sanitize_match(m: 're.Match') -> str:
-    """
-    Correct the special characters in the match
-    """
-    delim_left = m.group(0)[0]
-    delim_right = m.group(0)[-1]
-    s = m.group(0)[1:-1]
-    return delim_left + sanitize(re.compile(r'[A-Za-z0-9\']+'), s) + delim_right
-
-
 def sanitize(allowed: 're.Pattern', s: str) -> str:
     s = unicodedata.normalize('NFKC', s).translate(ext_ascii_trans)
     return '_'.join(m.group(0) for m in re.finditer(allowed, s))
@@ -28,12 +18,12 @@ def sanitize(allowed: 're.Pattern', s: str) -> str:
 
 def clean_tree(s: str) -> str:
     if re.search(r'\[&', s):
-        regex = re.compile(r'\([^([]+\[|,[^,[]+\[')
+        allowed = re.compile(r'([A-Za-z0-9()\',]|:\d|\[&)+')
     elif re.search(r':\d', s):
-        regex = re.compile(r'\'[^\']\'\([^(:]+:|,[^(,:]+:')
+        allowed = re.compile(r'([A-Za-z0-9()\',]|:\d)+')
     else:
-        regex = re.compile(r'\([^(,]+,|,[^,]+,|,[^,)]\)')
-    return regex.sub(sanitize_match, s)
+        allowed = re.compile(r'([A-Za-z0-9()\',])+')
+    return sanitize(allowed, s)
 
 
 def find_tree_start(s: str) -> int:
