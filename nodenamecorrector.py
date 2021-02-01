@@ -2,6 +2,7 @@
 from library.reader import Reader
 from library.edits import delete_blanks, clean_tree, clean_nexus_part
 from typing import Iterator, TextIO
+from locale import getpreferredencoding
 import warnings
 import tkinter.messagebox as tkmessagebox
 import sys
@@ -31,14 +32,18 @@ def clean_wrapper(filename: str) -> None:
     base, ext = os.path.splitext(filename)
     outfile = base + '_corr' + ext
     with open(filename) as file, open(outfile, mode='w') as output:
-        if file.readline().startswith('#NEXUS'):
-            print('#NEXUS', file=output)
-            for part in clean_nexus(file):
-                print(part, file=output)
-        else:
-            file.seek(0, 0)
-            for tree in clean_newick(file):
-                print(tree, file=output)
+        try:
+            if file.readline().startswith('#NEXUS'):
+                print('#NEXUS', file=output)
+                for part in clean_nexus(file):
+                    print(part, file=output)
+            else:
+                file.seek(0, 0)
+                for tree in clean_newick(file):
+                    print(tree, file=output)
+        except UnicodeDecodeError:
+            raise ValueError(
+                f"Encoding error:\nPlease convert the file into {getpreferredencoding(False)}")
 
 
 def launch_gui() -> None:
