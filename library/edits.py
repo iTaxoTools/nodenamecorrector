@@ -18,7 +18,7 @@ def sanitize_match(m: 're.Match') -> str:
     delim_left = m.group(0)[0]
     delim_right = m.group(0)[-1]
     s = m.group(0)[1:-1]
-    return delim_left + sanitize(re.compile(r'[A-Za-z0-9]+'), s) + delim_right
+    return delim_left + sanitize(re.compile(r'[A-Za-z0-9\']+'), s) + delim_right
 
 
 def sanitize(allowed: 're.Pattern', s: str) -> str:
@@ -30,7 +30,7 @@ def clean_tree(s: str) -> str:
     if re.search(r'\[&', s):
         regex = re.compile(r'\([^([]+\[|,[^,[]+\[')
     elif re.search(r':\d', s):
-        regex = re.compile(r'\([^(:]+:|,[^,:]+:')
+        regex = re.compile(r'\'[^\']\'\([^(:]+:|,[^(,:]+:')
     else:
         regex = re.compile(r'\([^(,]+,|,[^,]+,|,[^,)]\)')
     return regex.sub(sanitize_match, s)
