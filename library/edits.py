@@ -11,7 +11,7 @@ def delete_blanks(s: str) -> str:
     return re.sub(r'\s+', '', s)
 
 
-def sanitize_match(m: re.Match) -> str:
+def sanitize_match(m: 're.Match') -> str:
     """
     Correct the special characters in the match
     """
@@ -21,7 +21,7 @@ def sanitize_match(m: re.Match) -> str:
     return delim_left + sanitize(re.compile(r'[A-Za-z0-9]+'), s) + delim_right
 
 
-def sanitize(allowed: re.Pattern, s: str) -> str:
+def sanitize(allowed: 're.Pattern', s: str) -> str:
     s = unicodedata.normalize('NFKC', s).translate(ext_ascii_trans)
     return '_'.join(m.group(0) for m in re.finditer(allowed, s))
 

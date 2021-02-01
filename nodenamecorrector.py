@@ -3,7 +3,7 @@ from library.reader import Reader
 from library.edits import delete_blanks, clean_tree, clean_nexus_part
 from typing import Iterator, TextIO
 import warnings
-from tkinter import messagebox
+import tkinter.messagebox as tkmessagebox
 import sys
 import os
 from library.gui_utils import *
@@ -11,13 +11,19 @@ from library.gui_utils import *
 
 def clean_newick(file: TextIO) -> Iterator[str]:
     file_w = Reader(file)
-    while (tree := file_w.read_until(';\n')):
+    while True:
+        tree = file_w.read_until(';\n')
+        if not tree:
+            break
         yield clean_tree(delete_blanks(tree))
 
 
 def clean_nexus(file: TextIO) -> Iterator[str]:
     file_w = Reader(file)
-    while (part := file_w.read_until(';\n').rstrip()):
+    while True:
+        part = file_w.read_until(';\n').rstrip()
+        if not part:
+            break
         yield clean_nexus_part(part)
 
 
@@ -52,10 +58,10 @@ def launch_gui() -> None:
             with warnings.catch_warnings(record=True) as warns:
                 clean_wrapper(filename)
                 for w in warns:
-                    tk.messagebox.showwarning(
+                    tkmessagebox.showwarning(
                         title="Warning", message=str(w.message))
         except Exception as ex:
-            tk.messagebox.showerror(title="Error", message=str(ex))
+            tkmessagebox.showerror(title="Error", message=str(ex))
 
     correct_btn = ttk.Button(mainframe, text="convert", command=process)
     correct_btn.grid(row=1, column=0)
