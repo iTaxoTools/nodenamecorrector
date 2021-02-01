@@ -65,10 +65,12 @@ def launch_gui() -> None:
                 for w in warns:
                     tkmessagebox.showwarning(
                         title="Warning", message=str(w.message))
+            tkmessagebox.showinfo(
+                title="Done", message="Correction is complete")
         except Exception as ex:
             tkmessagebox.showerror(title="Error", message=str(ex))
 
-    correct_btn = ttk.Button(mainframe, text="convert", command=process)
+    correct_btn = ttk.Button(mainframe, text="Convert", command=process)
     correct_btn.grid(row=1, column=0)
 
     mainframe.grid(row=0, column=0, sticky='nsew')
