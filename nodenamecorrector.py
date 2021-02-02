@@ -2,8 +2,9 @@
 from library.reader import Reader
 from library.edits import delete_blanks, clean_tree, clean_nexus_part
 from typing import Iterator, TextIO
+from locale import getpreferredencoding
 import warnings
-from tkinter import messagebox
+import tkinter.messagebox as tkmessagebox
 import sys
 import os
 from library.gui_utils import *
@@ -11,28 +12,38 @@ from library.gui_utils import *
 
 def clean_newick(file: TextIO) -> Iterator[str]:
     file_w = Reader(file)
-    while (tree := file_w.read_until(';\n')):
-        yield clean_tree(delete_blanks(tree))
+    while True:
+        tree = file_w.read_until(';\n')
+        if not tree:
+            break
+        yield clean_tree(delete_blanks(tree)) + ';'
 
 
 def clean_nexus(file: TextIO) -> Iterator[str]:
     file_w = Reader(file)
-    while (part := file_w.read_until(';\n').rstrip()):
-        yield clean_nexus_part(part)
+    while True:
+        part = file_w.read_until(';\n').rstrip()
+        if not part:
+            break
+        yield clean_nexus_part(part) + ';'
 
 
 def clean_wrapper(filename: str) -> None:
     base, ext = os.path.splitext(filename)
     outfile = base + '_corr' + ext
     with open(filename) as file, open(outfile, mode='w') as output:
-        if file.readline().startswith('#NEXUS'):
-            print('#NEXUS', file=output)
-            for part in clean_nexus(file):
-                print(part, file=output)
-        else:
-            file.seek(0, 0)
-            for tree in clean_newick(file):
-                print(tree, file=output)
+        try:
+            if file.readline().startswith('#NEXUS'):
+                print('#NEXUS', file=output)
+                for part in clean_nexus(file):
+                    print(part, file=output)
+            else:
+                file.seek(0, 0)
+                for tree in clean_newick(file):
+                    print(tree, file=output)
+        except UnicodeDecodeError:
+            raise ValueError(
+                f"Encoding error:\nPlease convert the file into {getpreferredencoding(False)}")
 
 
 def launch_gui() -> None:
@@ -52,12 +63,14 @@ def launch_gui() -> None:
             with warnings.catch_warnings(record=True) as warns:
                 clean_wrapper(filename)
                 for w in warns:
-                    tk.messagebox.showwarning(
+                    tkmessagebox.showwarning(
                         title="Warning", message=str(w.message))
+            tkmessagebox.showinfo(
+                title="Done", message="Correction is complete")
         except Exception as ex:
-            tk.messagebox.showerror(title="Error", message=str(ex))
+            tkmessagebox.showerror(title="Error", message=str(ex))
 
-    correct_btn = ttk.Button(mainframe, text="convert", command=process)
+    correct_btn = ttk.Button(mainframe, text="Convert", command=process)
     correct_btn.grid(row=1, column=0)
 
     mainframe.grid(row=0, column=0, sticky='nsew')
