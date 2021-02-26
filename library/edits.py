@@ -18,11 +18,11 @@ def sanitize(allowed: 're.Pattern', s: str) -> str:
 
 def clean_tree(s: str) -> str:
     if re.search(r'\[&', s):
-        allowed = re.compile(r'([A-Za-z0-9()\',]|:\d|\[&)+')
+        allowed = re.compile(r'([A-Za-z0-9()\',.]|:\d|\[&)+')
     elif re.search(r':\d', s):
-        allowed = re.compile(r'([A-Za-z0-9()\',]|:\d)+')
+        allowed = re.compile(r'([A-Za-z0-9()\',.]|:\d)+')
     else:
-        allowed = re.compile(r'([A-Za-z0-9()\',])+')
+        allowed = re.compile(r'([A-Za-z0-9()\',.])+')
     return sanitize(allowed, s)
 
 
